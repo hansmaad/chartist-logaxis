@@ -10,6 +10,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/chartist": "^0.9.44",
     "chartist": "^0.11.0",
     "rollup": "^1.11.3",
     "rollup-plugin-commonjs": "^9.3.4",

@@ -1,38 +1,90 @@
 
 import * as Chartist from 'chartist';
+import { ChartistStatic } from 'chartist';
+
+interface ChartistInternal extends ChartistStatic {
+    AutoScaleAxis: any;
+    Axis: any;
+    getBounds(...x);
+    getHighLow(...x);
+    createGrid(...x);
+    getMultiValue(...x);
+}
+
+const globalChartist = Chartist as ChartistInternal;
 
 function AutoScaleAxis(axisUnit, data, chartRect, options) {
 
-    var scale = options.scale || 'linear';
-    var match = scale.match(/^([a-z]+)(\d+)?$/);
+    const scale = options.scale || 'linear';
+    const match = scale.match(/^([a-z]+)(\d+)?$/);
     this.scale = {
         type: match[1],
         base: Number(match[2]) || 10,
-    }
+    };
 
     if (this.scale.type === 'log') {
-        var highLow = options.highLow || getLogAxisHighLow(data, options, axisUnit.pos);
+        const highLow = options.highLow || getLogAxisHighLow(data, options, axisUnit.pos);
         this.bounds = getLogAxisBounds(chartRect[axisUnit.rectEnd] - chartRect[axisUnit.rectStart],
             highLow, options.scaleMinSpace || 20, options.onlyInteger, this.scale.base);
     }
     else {
-        // Usually we calculate highLow based on the data but this can be 
+        // Usually we calculate highLow based on the data but this can be
         // overriden by a highLow object in the options
-        var highLow = options.highLow || Chartist.getHighLow(data, options, axisUnit.pos);
-        this.bounds = Chartist.getBounds(chartRect[axisUnit.rectEnd] - chartRect[axisUnit.rectStart],
+        const highLow = options.highLow || globalChartist.getHighLow(data, options, axisUnit.pos);
+        this.bounds = globalChartist.getBounds(chartRect[axisUnit.rectEnd] - chartRect[axisUnit.rectStart],
             highLow, options.scaleMinSpace || 20, options.onlyInteger);
     }
 
-    Chartist.AutoScaleAxis.super.constructor.call(this,
+    globalChartist.AutoScaleAxis.super.constructor.call(this,
         axisUnit,
         chartRect,
         this.bounds.values,
         options);
 }
 
-let c = <any>Chartist;
-c.AutoScaleAxis = Chartist.Axis.extend({
+function createGridAndLabels(gridGroup, labelGroup, useForeignObject, chartOptions, eventEmitter) {
+    const axisOptions = chartOptions['axis' + this.units.pos.toUpperCase()];
+    const projectedValues = this.ticks.map(this.projectValue.bind(this));
+
+    globalChartist.AutoScaleAxis.super.createGridAndLabels.call(this,
+        gridGroup, labelGroup, useForeignObject, chartOptions, eventEmitter);
+
+    if (this.scale.type === 'log') {
+
+        this.ticks.forEach((tick, index) => {
+
+            const nextTick = this.ticks[index + 1];
+            if (nextTick) {
+                const minorGridTick = (nextTick - tick) / 5;
+                for (let i = 1; i < 5; ++i) {
+                    let projectedValue = this.projectValue(tick + i * minorGridTick);
+
+                    // Transform to global coordinates using the chartRect
+                    if (this.units.pos === 'x') {
+                        projectedValue = this.chartRect.x1 + projectedValue;
+                    }
+                    else {
+                        projectedValue = this.chartRect.y1 - projectedValue;
+                    }
+
+                    globalChartist.createGrid(projectedValue, index, this, this.gridOffset,
+                        this.chartRect[this.counterUnits.len](), gridGroup, [
+                        chartOptions.classNames.grid,
+                        chartOptions.classNames[this.units.dir],
+                        chartOptions.classNames.gridMinor,
+                      ], eventEmitter);
+                }
+            }
+
+        });
+    }
+
+}
+
+
+globalChartist.AutoScaleAxis = globalChartist.Axis.extend({
     constructor: AutoScaleAxis,
+    createGridAndLabels: createGridAndLabels,
     projectValue: logAxisProjectValue,
 });
 
@@ -43,15 +95,15 @@ interface ILogAxisBounds {
 }
 
 function getLogAxisBounds(axisLength, highLow, scaleMinSpace, onlyInteger, logBase: number): ILogAxisBounds {
-    let bounds = Chartist.getBounds(axisLength, highLow, scaleMinSpace, onlyInteger);
+    const bounds = globalChartist.getBounds(axisLength, highLow, scaleMinSpace, onlyInteger);
 
-    var minDecade = Math.floor(baseLog(highLow.low, logBase));
-    var maxDecade = Math.ceil(baseLog(highLow.high, logBase));
+    const minDecade = Math.floor(baseLog(highLow.low, logBase));
+    const maxDecade = Math.ceil(baseLog(highLow.high, logBase));
 
     bounds.min = Math.pow(logBase, minDecade);
     bounds.max = Math.pow(logBase, maxDecade);
     bounds.values = [];
-    for (var decade = minDecade; decade <= maxDecade; ++decade) {
+    for (let decade = minDecade; decade <= maxDecade; ++decade) {
         bounds.values.push(Math.pow(logBase, decade));
     }
     return bounds;
@@ -62,23 +114,23 @@ function baseLog(val, base) {
 }
 
 function allValuesEqual(data, dimension): boolean {
-    let value = null;
+    const value = null;
 
     function sameValue(data): boolean {
         if (Array.isArray(data)) {
             return data.every(sameValue);
         }
-        var v = dimension ? +data[dimension] : +data;
+        const v = dimension ? +data[dimension] : +data;
         return value == null || v === value;
     }
     return sameValue(data);
 }
 
 function getLogAxisHighLow(
-    data: {x:number, y:number}[],
+    data: { x: number, y: number }[],
     options: any, dimension: string): { low: number, high: number } {
 
-    var highLow = options.highLow || Chartist.getHighLow(data, options, dimension);
+    const highLow = options.highLow || globalChartist.getHighLow(data, options, dimension);
 
     if (data.length === 0) {
         highLow.low = 1;
@@ -95,11 +147,11 @@ function getLogAxisHighLow(
 }
 
 function logAxisProjectValue(value) {
-    value = +Chartist.getMultiValue(value, this.units.pos);
-    var max = this.bounds.max;
-    var min = this.bounds.min;
+    value = +globalChartist.getMultiValue(value, this.units.pos);
+    const max = this.bounds.max;
+    const min = this.bounds.min;
     if (this.scale.type === 'log') {
-        var base = this.scale.base;
+        const base = this.scale.base;
         return this.axisLength / baseLog(max / min, base) * baseLog(value / min, base);
     }
     return this.axisLength * (value - min) / this.bounds.range;
