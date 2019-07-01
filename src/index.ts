@@ -43,13 +43,12 @@ function AutoScaleAxis(axisUnit, data, chartRect, options) {
 }
 
 function createGridAndLabels(gridGroup, labelGroup, useForeignObject, chartOptions, eventEmitter) {
-    const axisOptions = chartOptions['axis' + this.units.pos.toUpperCase()];
-    const projectedValues = this.ticks.map(this.projectValue.bind(this));
 
+    var axisOptions = chartOptions['axis' + this.units.pos.toUpperCase()];
     globalChartist.AutoScaleAxis.super.createGridAndLabels.call(this,
         gridGroup, labelGroup, useForeignObject, chartOptions, eventEmitter);
 
-    if (this.scale.type === 'log') {
+    if (axisOptions.showMinorGrid && this.scale.type === 'log') {
 
         this.ticks.forEach((tick, index) => {
 
@@ -80,7 +79,6 @@ function createGridAndLabels(gridGroup, labelGroup, useForeignObject, chartOptio
     }
 
 }
-
 
 globalChartist.AutoScaleAxis = globalChartist.Axis.extend({
     constructor: AutoScaleAxis,

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>chartist log axis</title>
+  <link rel="stylesheet" href="node_modules/chartist/dist/chartist.min.css">
+  <style>
+    body, html {
+      padding: 0; margin:0;
+    }
+    .ct-grid {
+      stroke-dasharray: none;
+    }
+    .ct-grid-minor {
+      stroke-dasharray: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div style="height: 100vh">
+      <div id="c1" class="ct-chart" style="height: 100%; width:100%"></div>
+  </div>
+  <script src="node_modules/chartist/dist/chartist.js"></script>
+  <script src="dist/index.umd.js"></script>
+
+  <script>
+    var data  = {
+      series: [[
+        {x: 0.1, y: 1010},
+        {x: 2, y: 520},
+        {x: 3, y: 25},
+        {x: 40, y: 66},
+        {x: 500, y: 44},
+        {x: 6000, y: 0.22},
+      ]]
+    };
+
+    var options = {
+      classNames: {
+        gridMinor: 'ct-grid-minor'
+      },
+      chartPadding: {
+        top: 50,
+        right: 30,
+        left: 40,
+        bottom: 50
+      },
+      axisX: {
+        showMinorGrid: true,
+        type: Chartist.AutoScaleAxis,
+        scale: 'log2',
+      },
+      axisY: {
+        showMinorGrid: true,
+        type: Chartist.AutoScaleAxis,
+        scale: 'log10',
+      },
+    };
+    var chart1 = Chartist.Line('#c1', data, options);
+
+  </script>
+</body>
+</html>
