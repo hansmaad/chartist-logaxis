@@ -54,8 +54,8 @@ function createGridAndLabels(gridGroup, labelGroup, useForeignObject, chartOptio
 
             const nextTick = this.ticks[index + 1];
             if (nextTick) {
-                const minorGridTick = (nextTick - tick) / 5;
-                for (let i = 1; i < 5; ++i) {
+                const minorGridTick = (nextTick - tick) / 9;
+                for (let i = 1; i < 9; ++i) {
                     let projectedValue = this.projectValue(tick + i * minorGridTick);
 
                     // Transform to global coordinates using the chartRect
