@@ -23,6 +23,10 @@ var chart = new Chartist.Line('#mychart',
         showMinorGrid: true,
         type: Chartist.AutoScaleAxis,
         scale: 'log10',
+    },
+    axisX: {
+        showMinorGrid: 4,
+        type: Chartist.AutoScaleAxis,
     }
 });
 ```

@@ -48,14 +48,23 @@ function createGridAndLabels(gridGroup, labelGroup, useForeignObject, chartOptio
     globalChartist.AutoScaleAxis.super.createGridAndLabels.call(this,
         gridGroup, labelGroup, useForeignObject, chartOptions, eventEmitter);
 
-    if (axisOptions.showMinorGrid && this.scale.type === 'log') {
+    if (axisOptions.showMinorGrid) {
 
         this.ticks.forEach((tick, index) => {
-
+            let lines = this.scale.type === 'log' ? 8 : 4;  // default number of lines
+            if (axisOptions.showMinorGrid !== true) {
+                // showMinorGrid can be boolean for defaults or number of lines
+                const linesOption = +axisOptions.showMinorGrid
+                if (linesOption > 0 && linesOption <= 10) {
+                    lines = linesOption;
+                }
+            }
+            
+            const sections = lines + 1;
             const nextTick = this.ticks[index + 1];
             if (nextTick) {
-                const minorGridTick = (nextTick - tick) / 9;
-                for (let i = 1; i < 9; ++i) {
+                const minorGridTick = (nextTick - tick) / sections;
+                for (let i = 1; i < sections; ++i) {
                     let projectedValue = this.projectValue(tick + i * minorGridTick);
 
                     // Transform to global coordinates using the chartRect
@@ -74,7 +83,6 @@ function createGridAndLabels(gridGroup, labelGroup, useForeignObject, chartOptio
                       ], eventEmitter);
                 }
             }
-
         });
     }
 
