@@ -34,6 +34,10 @@ function AutoScaleAxis(axisUnit, data, chartRect, options) {
         this.bounds = globalChartist.getBounds(chartRect[axisUnit.rectEnd] - chartRect[axisUnit.rectStart],
             highLow, options.scaleMinSpace || 20, options.onlyInteger);
     }
+    this.range = {
+        min: this.bounds.min,
+        max: this.bounds.max
+    };
 
     globalChartist.AutoScaleAxis.super.constructor.call(this,
         axisUnit,

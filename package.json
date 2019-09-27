@@ -1,6 +1,6 @@
 {
   "name": "chartist-logaxis",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "",
   "main": "dist/index.umd.js",
   "scripts": {
@@ -8,6 +8,10 @@
     "build:watch": "rollup -cw"
   },
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hansmaad/chartist-logaxis.git"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/chartist": "^0.9.44",
